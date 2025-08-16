@@ -62,6 +62,9 @@ graph TD
 	C -- Writes Metadata --> F
 ```
 
+<img width="1368" height="534" alt="Screenshot 2025-08-16 184336" src="https://github.com/user-attachments/assets/7a43272c-c1c1-4fd6-a627-8e5be740a190" />
+
+
 ## Getting Started
 
 To deploy and run this project, follow these steps. For more detailed instructions, see `docs/DEPLOYMENT.md`.
