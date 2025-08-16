@@ -1,0 +1,71 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Serverless Image Processing App
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.8
+
+Resources:
+  OriginalImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-original-images'
+
+  ProcessedImagesBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${AWS::StackName}-processed-images'
+
+  ImageProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: lambda_function.lambda_handler
+      CodeUri: ../lambda/
+      Policies:
+        - S3ReadPolicy:
+            BucketName: !Ref OriginalImagesBucket
+        - S3WritePolicy:
+            BucketName: !Ref ProcessedImagesBucket
+        - DynamoDBCrudPolicy:
+            TableName: !Ref ImageMetadataTable
+      Environment:
+        Variables:
+          PROCESSED_BUCKET: !Ref ProcessedImagesBucket
+          METADATA_TABLE: !Ref ImageMetadataTable
+      Events:
+        S3UploadEvent:
+          Type: S3
+          Properties:
+            Bucket: !Ref OriginalImagesBucket
+            Events: s3:ObjectCreated:*
+        ApiUploadEvent:
+          Type: Api
+          Properties:
+            Path: /upload
+            Method: post
+
+  ImageMetadataTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub '${AWS::StackName}-image-metadata'
+      PrimaryKey:
+        Name: image_id
+        Type: String
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+
+  # Optional: API Gateway and DynamoDB resources can be added here
+
+Outputs:
+  OriginalImagesBucket:
+    Value: !Ref OriginalImagesBucket
+  ProcessedImagesBucket:
+    Value: !Ref ProcessedImagesBucket
+  ImageProcessorFunction:
+    Value: !GetAtt ImageProcessorFunction.Arn
+  ImageUploadApi:
+    Description: "API Gateway endpoint for uploading images"
+    Value: !Sub 'https://\${ServerlessRestApi}.execute-api.\${AWS::Region}.amazonaws.com/Prod/upload'
