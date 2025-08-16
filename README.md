@@ -64,4 +64,38 @@ graph TD
 
 ## Getting Started
 
-See `infrastructure/` for deployment instructions and `docs/DEPLOYMENT.md` for detailed steps.
+To deploy and run this project, follow these steps. For more detailed instructions, see `docs/DEPLOYMENT.md`.
+
+### Prerequisites
+- **AWS Account**: You will need an AWS account to deploy the resources.
+- **AWS CLI**: The AWS Command Line Interface must be installed and configured with your credentials.
+- **AWS SAM CLI**: The AWS Serverless Application Model (SAM) CLI is required to build and deploy the application.
+- **Python**: Python 3.8 (or the version specified in `infrastructure/template.yaml`) must be installed.
+
+### Deployment Process
+1. **Clone the Repository**:
+   ```bash
+   git clone https://github.com/trivikramm/serverless-image-processing-app.git
+   cd serverless-image-processing-app
+   ```
+
+2. **Build the Application**:
+   Navigate to the `infrastructure` directory and run the `sam build` command. This command bundles the Lambda function code and its dependencies.
+   ```bash
+   cd infrastructure
+   sam build
+   ```
+
+3. **Deploy to AWS**:
+   Run the `sam deploy --guided` command. This will walk you through the deployment process, prompting you for parameters like a Stack Name and AWS Region.
+   ```bash
+   sam deploy --guided
+   ```
+   After a successful deployment, the AWS CloudFormation outputs will display the names of your S3 buckets and the API Gateway endpoint URL.
+
+4. **Test the Application**:
+   You can now test the pipeline in two ways:
+   - **S3 Trigger**: Upload an image file directly to the `original-images` S3 bucket in the AWS console.
+   - **API Gateway**: Send a POST request to the API endpoint with a JSON body containing a base64-encoded image.
+
+   In both cases, the processed image will be saved in the `processed-images` S3 bucket, and a new entry will be created in the DynamoDB table.
